@@ -1,0 +1,327 @@
+/* IAM Privilege Escalation Auditor — dashboard styling
+   Design intent: a dense, scannable security console, not a SaaS card grid.
+   Monospace is used only where it's functionally justified (ARNs, action
+   names, identity names) — not as a blanket aesthetic choice. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0F1419;
+  --panel: #161B22;
+  --panel-raised: #1C222B;
+  --border: #2A313C;
+  --text: #E6E8EB;
+  --text-muted: #8B94A3;
+  --text-dim: #5A6472;
+
+  --critical: #E5484D;
+  --critical-bg: rgba(229, 72, 77, 0.08);
+  --high: #F0883E;
+  --high-bg: rgba(240, 136, 62, 0.08);
+  --medium: #E3B341;
+  --medium-bg: rgba(227, 179, 65, 0.08);
+  --safe: #3FB950;
+
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.shell {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ---- Header ---- */
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+header .subtitle {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+header .badge {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---- Control panel ---- */
+
+.controls {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.controls-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 8px 10px;
+  min-width: 220px;
+}
+
+.field input[type="text"]:focus,
+.field input[type="number"]:focus {
+  outline: none;
+  border-color: var(--text-dim);
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.checkbox-field label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.checkbox-field input[type="checkbox"] {
+  accent-color: var(--high);
+}
+
+button.run {
+  background: var(--high);
+  color: #1a1002;
+  border: none;
+  border-radius: 3px;
+  padding: 9px 18px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  height: 37px;
+}
+
+button.run:hover { filter: brightness(1.08); }
+button.run:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.controls-help {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---- Error ---- */
+
+.error-box {
+  background: var(--critical-bg);
+  border: 1px solid var(--critical);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--critical);
+}
+
+/* ---- Summary strip ---- */
+
+.summary {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.summary-stat {
+  flex: 1;
+  padding: 16px 20px;
+  border-right: 1px solid var(--border);
+}
+
+.summary-stat:last-child { border-right: none; }
+
+.summary-stat .value {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.summary-stat .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.summary-stat.critical .value { color: var(--critical); }
+.summary-stat.at-risk .value { color: var(--text); }
+
+/* ---- Findings ---- */
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-heading h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.download-link {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--text-dim);
+}
+
+.download-link:hover { color: var(--text); border-color: var(--text); }
+
+.finding {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 3px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+
+.finding.critical { border-left-color: var(--critical); }
+.finding.high { border-left-color: var(--high); }
+.finding.medium { border-left-color: var(--medium); }
+
+.finding-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.severity-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.severity-tag.critical { background: var(--critical-bg); color: var(--critical); }
+.severity-tag.high { background: var(--high-bg); color: var(--high); }
+.severity-tag.medium { background: var(--medium-bg); color: var(--medium); }
+
+.finding-identity {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.finding-type {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.finding-technique {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.finding-technique strong { color: var(--text); font-weight: 600; }
+
+.finding-actions {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--panel-raised);
+  border-radius: 3px;
+  padding: 6px 10px;
+  display: inline-block;
+}
+
+.finding-usage {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.finding-usage.active { color: var(--medium); }
+.finding-usage.none { color: var(--text-dim); }
+
+/* ---- Empty / clean state ---- */
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.clean-state {
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.clean-state .value {
+  color: var(--safe);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .summary { flex-direction: column; }
+  .summary-stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .summary-stat:last-child { border-bottom: none; }
+}

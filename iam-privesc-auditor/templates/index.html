@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAM Privilege Escalation Auditor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="shell">
+
+    <header>
+      <div>
+        <h1>IAM Privilege Escalation Auditor</h1>
+        <div class="subtitle">Finds identities that can escalate their own AWS permissions</div>
+      </div>
+      <div class="badge">v1</div>
+    </header>
+
+    <form class="controls" method="POST" action="{{ url_for('scan') }}">
+      <div class="controls-row">
+        <div class="field">
+          <label for="endpoint_url">Endpoint URL</label>
+          <input type="text" id="endpoint_url" name="endpoint_url"
+                 placeholder="http://localhost:4566"
+                 value="{{ config.endpoint_url if config else 'http://localhost:4566' }}">
+        </div>
+        <div class="field">
+          <label for="profile">AWS profile</label>
+          <input type="text" id="profile" name="profile"
+                 placeholder="default"
+                 value="{{ config.profile if config else '' }}">
+        </div>
+        <div class="field">
+          <label for="region">Region</label>
+          <input type="text" id="region" name="region"
+                 value="{{ config.region if config else 'us-east-1' }}">
+        </div>
+        <div class="field">
+          <label for="lookback_days">CloudTrail lookback (days)</label>
+          <input type="number" id="lookback_days" name="lookback_days"
+                 value="{{ config.lookback_days if config else 90 }}">
+        </div>
+      </div>
+
+      <div class="controls-row" style="margin-top: 14px;">
+        <div class="checkbox-field">
+          <input type="checkbox" id="local_eval" name="local_eval"
+                 {% if not config or config.local_eval %}checked{% endif %}>
+          <label for="local_eval">Local policy evaluation (needed for LocalStack)</label>
+        </div>
+        <div class="checkbox-field">
+          <input type="checkbox" id="skip_cloudtrail" name="skip_cloudtrail"
+                 {% if not config or config.skip_cloudtrail %}checked{% endif %}>
+          <label for="skip_cloudtrail">Skip CloudTrail cross-reference</label>
+        </div>
+        <button type="submit" class="run">Run audit</button>
+      </div>
+
+      <div class="controls-help">
+        Leave Endpoint URL blank to scan a real AWS account using your configured profile/credentials instead.
+      </div>
+    </form>
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    {% if summary %}
+    <div class="summary">
+      <div class="summary-stat critical">
+        <div class="value">{{ summary.by_severity.CRITICAL }}</div>
+        <div class="label">Critical</div>
+      </div>
+      <div class="summary-stat">
+        <div class="value" style="color: var(--high);">{{ summary.by_severity.HIGH }}</div>
+        <div class="label">High</div>
+      </div>
+      <div class="summary-stat">
+        <div class="value" style="color: var(--medium);">{{ summary.by_severity.MEDIUM }}</div>
+        <div class="label">Medium</div>
+      </div>
+      <div class="summary-stat at-risk">
+        <div class="value">{{ summary.identities_at_risk }}</div>
+        <div class="label">Identities at risk</div>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h2>Findings</h2>
+      {% if report_exists %}
+      <a class="download-link" href="{{ url_for('download_report') }}">Download report.md</a>
+      {% endif %}
+    </div>
+
+    {% if findings %}
+      {% for f in findings %}
+      <div class="finding {{ f.severity|lower }}">
+        <div class="finding-top">
+          <span class="severity-tag {{ f.severity|lower }}">{{ f.severity }}</span>
+          <span class="finding-identity">{{ f.identity_name }}</span>
+          <span class="finding-type">{{ f.identity_type }}</span>
+        </div>
+        <div class="finding-technique">
+          <strong>{{ f.rule_name }}</strong> — {{ f.description }}
+        </div>
+        <div class="finding-actions">{{ f.matched_actions|join(', ') }}</div>
+        {% if f.usage_evidence %}
+        <div class="finding-usage active">Active usage detected — {{ f.usage_evidence|length }} event(s) in lookback window</div>
+        {% else %}
+        <div class="finding-usage none">No recent CloudTrail evidence of use</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="clean-state">
+        <div class="value">No privilege escalation paths detected</div>
+      </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      Run an audit above to see findings here.
+    </div>
+    {% endif %}
+
+  </div>
+</body>
+</html>
